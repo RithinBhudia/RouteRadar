@@ -41,7 +41,7 @@ status_message
 FROM stg_service_status 
 
 WHERE end_time IS NOT NULL
-AND start_time IS NOT NULL
+AND start_time  IS NOT NULL
 AND end_time > start_time
 AND line_name IS NOT NULL
 AND service_status IS NOT NULL;
