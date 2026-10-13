@@ -40,6 +40,8 @@ WITH disruption_messages AS(
     )
 ),
 
+-- Find the latest end time of all the earlier disruption messages on the same line.
+-- This helps identify overlapping intervals.
 ordered AS(
     SELECT *,
     MAX(end_time) OVER(
@@ -50,6 +52,9 @@ ordered AS(
     FROM disruption_messages
 ),
 
+-- Flag the beginning of each new disruption period.
+-- Start a new number if there is no message or if 
+-- there is a time gap after the previous disruption.
 flagged AS(
     SELECT *,
     CASE WHEN previous_max_end IS NULL
@@ -60,6 +65,11 @@ flagged AS(
     FROM ordered
 ),
 
+
+-- Group the overlapping disruptions into one period.
+-- number the disruptions starting with 1.
+-- The number increases whenever a new interval begins.
+-- Overlapping or touching interval disruptions have the same group number.
 grouped AS(
     SELECT *,
     SUM(new_interval) OVER(
@@ -70,11 +80,14 @@ grouped AS(
     FROM flagged
 )
 
+
+-- Combine by calculating the earliest start, latest end, number of disturbance messages
+-- and total duration. 
+-- This is done without dounting overlapping times twice.
 SELECT line_name,
 MIN(start_time) AS start_time,
 MAX(end_time) AS end_time,
 COUNT(*) AS source_message_count,
-
 DATE_DIFF(
     'second',
     MIN(start_time),
