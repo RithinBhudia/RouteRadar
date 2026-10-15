@@ -1,5 +1,14 @@
-## This file takes the raw data tables I made in load_historical and executes 
-## the SQL transformations that creates the cleaned tables from the raw data.
+# ============================================================
+# Historical Train Service Status Data Cleaning
+# ============================================================
+
+# ============================================================
+# This file creates:
+# - Staging table: stg_service_status
+# - Cleaned table: clean_service_status
+#
+# Uses 01_clean_ditorical.sql
+# ============================================================
 
 
 from pathlib import Path

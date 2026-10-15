@@ -1,4 +1,15 @@
-# API extraction
+# ============================================================
+# TfL Tube Line Status API Extraction
+# ===========================================================
+
+# ===========================================================
+# This file creates:
+# - Folder: data/raw/api
+# - JSON file: tube_status_{timestamp}.json
+#
+# Each API request creates a new timestamped JSON file.
+# ===========================================================
+
 
 import os
 from pathlib import Path

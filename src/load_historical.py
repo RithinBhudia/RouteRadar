@@ -1,3 +1,14 @@
+# ==================================================================================
+# Historical Train Service Status Data Import
+# ==================================================================================
+
+# ==================================================================================
+# This fine Creates:
+# - DuckDB satabase: routeradar.duck.db
+# - Table: raw_service_status which contains all historical records from the CSV.
+# ==================================================================================
+
+
 from pathlib import Path
 import duckdb
 

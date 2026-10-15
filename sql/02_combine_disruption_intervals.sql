@@ -1,4 +1,14 @@
--- DISRUPTION INTERVAL MODEL
+-- =============================================================
+-- Historical Train Service Status - Disruption Interval Model
+-- =============================================================
+
+-- =============================================================
+-- This file creates:
+-- - Table: disruption_intervals
+--
+-- Source table: clean_service_status
+-- =============================================================
+
 
 -- Purpose:
 -- Calculate continuous periods where at least one disruption status was reported.

@@ -1,8 +1,17 @@
--- Historical data cleaning
+-- ============================================================
+-- Historical Train Service Status Data Cleaning
+-- ============================================================
+
+-- ============================================================
+-- This file creates:
+-- - table: stg_service_status
+-- - table: clean_service_status
+--
+-- Source table: raw_service_status
+-- ============================================================
 
 
 -- standardise the source fields and datatypes
-
 CREATE OR REPLACE TABLE stg_service_status AS
 SELECT
 NULLIF(TRIM("Line"), '') AS line_name,
