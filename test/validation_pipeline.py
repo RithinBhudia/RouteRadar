@@ -67,3 +67,5 @@ FROM clean_service_status
 
     assert raw_count == 118_595
     assert clean_count == 104_544
+
+    
