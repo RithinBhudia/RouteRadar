@@ -139,7 +139,8 @@ FROM classification;
 
 
 
-
+-- Disruption_intervals represents the duration of the disruption periods,
+-- It does not measure the severity of the disruptions or passanger delay.
 CREATE OR REPLACE TABLE disruption_intervals AS
 
 WITH disruption_messages AS(
