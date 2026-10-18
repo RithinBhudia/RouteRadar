@@ -5,9 +5,13 @@
 -- ============================================================
 -- This file creates:
 -- - table: stg_service_status
--- - table: clean_service_status
+--   contains columns:   line_name, start_time, end_time, service_status, status_message
+--   Source table: raw_service_status
 --
--- Source table: raw_service_status
+-- - table: clean_service_status
+--   contains columns:   line_name, start_time, end_time, service_status, status_message
+--   Source table: stg_service_status
+--
 -- ============================================================
 
 

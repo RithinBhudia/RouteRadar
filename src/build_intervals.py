@@ -1,3 +1,18 @@
+# ============================================================
+# Historical Disruption Combine Interval s
+# ============================================================
+
+# ============================================================
+# This file creates:
+# - Combined-interval disruption table: disruption_intervals
+#
+# Combines overlapping or touching disruption periods.
+# Validates that no overlapping intervals remain.
+#
+# Uses 02_combine_disruption_intervals.sql
+# ============================================================
+
+
 from pathlib import Path
 import duckdb
 

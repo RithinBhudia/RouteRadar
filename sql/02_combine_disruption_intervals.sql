@@ -2,12 +2,17 @@
 -- Historical Train Service Status - Disruption Interval Model
 -- =============================================================
 
--- =============================================================
+-- ====================================================================================================================
 -- This file creates:
--- - Table: disruption_intervals
+-- - Table: classified_service_status
+--   contains columns:   line_name, start_time, end_time, service_status, status_message
+--   Source table: clean_service_status
 --
--- Source table: clean_service_status
--- =============================================================
+-- - Table: disruption_intervals
+--   contains columns:   line_name, start_time, end_time, service_status, status_message, service_type, planned_or_not
+--   Source table: classified_service_status
+--
+-- =====================================================================================================================
 
 -- Business question:
 -- During my usual commuting hours, how much time has my Underground line 

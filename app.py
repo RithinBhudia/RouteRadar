@@ -1,25 +1,31 @@
+
+
+
 from pathlib import Path
 from datetime import timezone
 import duckdb
 import streamlit as st
 import pandas as pd
 
+
+# inital app configuration
 st.set_page_config(
     page_title = "RouteRadar",
     page_icon = "👽",
     layout = "wide"
 )
 
+# directories
 ROOT = Path(__file__).resolve().parent
 DATABASE = ROOT /"data/processed/routeradar.duckdb"
 
 
 
 # connect to duckdb
-
 if not DATABASE.exists():
     st.error("database not found.")
 
+# create a function to run sql query
 def run_query(sql, params = None):
     conn = duckdb.connect(str(DATABASE), read_only = True)
 
@@ -30,9 +36,9 @@ def run_query(sql, params = None):
 
 
 # page heading
-st.title("ЯR: RouteRadar")
+st.title(":red[Route]:blue[Radar] :grey[| Tube Insights]")
 st.write(
-    "Explore London Underground and historical distribution patterns."
+    "Explore service statuses and historical distribution patterns across London's Underground."
 )
 
 st.divider()
@@ -42,7 +48,7 @@ st.divider()
 
 # options for lines
 lines = run_query("""
-SELECT DiSTINCT line_name
+SELECT DISTINCT line_name
 FROM disruption_intervals
 WHERE line_name IS NOT NULL
 ORDER BY line_name
@@ -86,6 +92,8 @@ FROM api_line_status)
         )
 
     else:
+        # for each row where the line matches what the user put in the drop down is
+        # from the latest snapshot, write the status_description along with its respective reason.
         for _, row in status.iterrows():
             st.subheader(row["status_description"])
 
@@ -99,3 +107,108 @@ st.info("This section shows the latest SAVED API snapshot."
         " It may not necessarily be the current live service status.")
 
 
+
+## Historical morning commute analysis
+
+st.divider()
+st.header("Historical Morning Commute Analysis")
+
+st.write("Reported service restrictions during weekday" 
+" mornings between 07:00 and 09:00 in 2025")
+
+# generate weekday commute windows and intersect each window
+# with the non overlapping intervals we constructed
+commute_data = run_query("""
+WITH days AS (
+SELECT CAST(day_value AS DATE) AS commute_date
+
+FROM generate_series(DATE '2025-01-01', DATE '2025-12-31', 
+INTERVAL '1 day') AS t(day_value)
+
+WHERE EXTRACT(ISODOW FROM day_value)
+BETWEEN 1 AND 5
+),
+
+windows AS(
+SELECT commute_date,
+CAST(commute_date AS TIMESTAMP) + INTERVAL '7 hours' AS window_start,
+CAST(commute_date AS TIMESTAMP) + INTERVAL '9 hours' AS window_end
+
+FROM days
+)
+
+
+SELECT w.commute_date,
+COALESCE(SUM(
+DATE_DIFF('second', GREATEST(d.start_time, w.window_start),
+LEAST(d.end_time,w.window_end))
+),0) AS disruption_seconds
+
+FROM windows w
+
+LEFT JOIN disruption_intervals d
+ON d.line_name = ?
+AND d.start_time < w.window_end
+AND d.end_time > w.window_start
+
+GROUP BY w.commute_date
+ORDER BY w.commute_date
+
+""",[selected_line])
+# The code above is to count the duration of disruption periods between 7am and 9am.
+
+
+## calculate the summary metrics
+
+# number of mornings with some disruption
+affected_mornings = int(
+    (commute_data["disruption_seconds"] > 0).sum()
+)
+
+# total number of mornings
+total_mornings = len(commute_data)
+
+# total number of hours
+total_hours = (
+    commute_data["disruption_seconds"].sum() / 3600
+)
+
+# split page into two for results
+column1, column2 = st.columns(2)
+
+# proportion of restricted mornings
+with column1:
+    st.metric(
+        "Mornings with reported restrictions",
+        f"{affected_mornings} / {total_mornings}"
+    )
+
+# total duration in hours of disruptions in commuting hours
+with column2:
+    st.metric(
+        "Total reported restriction hours",
+        f"{total_hours:.1f}"
+    )
+
+## visualise monthly patterns - bar graph
+# add month column to commute_data
+commute_data["month"] = pd.to_datetime(
+    commute_data["commute_date"]
+).dt.strftime("%Y-%m")
+
+month = (
+    commute_data.groupby("month", sort = True)["disruption_seconds"]
+    .sum().div(3600)
+    .reset_index(name = "reported_hours")
+)
+
+st.subheader("Restricted hours by month")
+
+st.bar_chart(
+    month,
+    x = "month",
+    y = "reported_hours"
+
+)
+
+st.divider()
