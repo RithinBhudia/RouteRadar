@@ -200,8 +200,13 @@ with st.container(border = True, key = "lighter_colour3"):
 
     SELECT w.commute_date,
     COALESCE(SUM(
+    CASE
+    WHEN d.start_time IS NOT NULL THEN
     DATE_DIFF('second', GREATEST(d.start_time, w.window_start),
-    LEAST(d.end_time,w.window_end))
+    LEAST(d.end_time,w.window_end)
+    ) 
+    ELSE 0
+    END
     ),0) AS disruption_seconds
 
     FROM windows w
