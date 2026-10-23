@@ -21,6 +21,14 @@ The question I wanted my app to answer are: *How frequently was my line reportin
 
 **About me and why I applied:** I've become interested in data engineering because I like the process of taking messy data, figuring out what's going on with it and turning it into something useful. What interests me about The Information Lab is the chance to learn from people with more experience, improve my technical skills and work on real projects. Building RouteRadar has taught me a lot, especially that working with data isn't just about writing code that works, but also understanding the data and questioning the decisions you're making along the way. I know I've still got a lot to learn, but that's one of the reasons I'm excited about this opportunity.
 
+**Where AI helped:** I used AI as a learning resource throughout the project, mainly to help me understand certain technical concepts, explore different approaches and troubleshoot issues when I got stuck.
+
+It also helped me with parts of the README, including the repository structure diagram, and with organising the dependencies in my requirements.txt file. I used it for some of the Streamlit styling and layout, particularly the HTML and CSS elements.
+
+I reviewed and adapted the suggestions to fit my project rather than just accepting them as they were. It was especially useful for discussing different approaches and questioning the reasoning behind certain decisions, such as how to classify the historical service statuses.
+
+I'm also currently using it to explore Flock and Flet as I'd eventually like to turn RouteRadar into a mobile app. I'm still deciding which approach would work best and AI has been useful for understanding the options and what would be involved.
+
 ## The data
 
 ### TfL Unified API:
