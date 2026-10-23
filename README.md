@@ -4,7 +4,7 @@
 
 RouteRadar is a Streamlit dashboard supported by a Pyhon, SQL, DuckDB data pipeline. It combines the latest Transport for London (TfL) *API status snapshots* with *historical service status records* to help people explore when their Underground line has been reported to have service restrictions.
 
-> *Project status:* First draft. Historical figures currently cover the selected TfL status categories and weekday morning commute windows in 2025. *They should not be interpreted as measured passenger delays.*
+> **Project status:** First draft. Historical figures currently cover the selected TfL status categories and weekday morning commute windows in 2025. **They should not be interpreted as measured passenger delays.**
 
 ## What I built and who is it for
 
@@ -12,12 +12,14 @@ I built RouteRadar for London Underground commuters who want more context about 
 
 Users can select an Underground line to:
 
-- View the **l*atest collected TfL service status**, including when the snapshot was taken.
+- View the **latest collected TfL service status**, including when the snapshot was taken.
 - See **how many mornings has a reported service restrictriction between 7am and 9am** in 2025.
 - See **how many hours those restrictions covered**.
 - Compare **monthly patters** in recorded restriction coverage.*
 
 The question I wanted my app to answer are: *How frequently was my line reporting a restriction during my morning commuting hours?* *How long did these reports cover?* *Did certain months have more reported restriction time than others?* *What did TfL report in their latest API?*
+
+**About me and why I applied:** I've become interested in data engineering because I like the process of taking messy data, figuring out what's going on with it and turning it into something useful. What interests me about The Information Lab is the chance to learn from people with more experience, improve my technical skills and work on real projects. Building RouteRadar has taught me a lot, especially that working with data isn't just about writing code that works, but also understanding the data and questioning the decisions you're making along the way. I know I've still got a lot to learn, but that's one of the reasons I'm excited about this opportunity.
 
 ## The data
 
@@ -62,7 +64,7 @@ RouteRadar/
 │   │       └── tube_status_*.json
 │   │
 │   └── processed/
-│       └── routeradar.duckdb
+│       └── routeradar.duckdb     (To be stored locally)
 │
 ├── notebooks/
 │   └── 01_profiling_historical.ipynb
@@ -140,10 +142,11 @@ The cleaning and modelling uses `CREATE OR REPLACE` tables so rerunning them reb
 - The analysis uses calendar weekdays, **bank holidays are not currently excluded**
 - The calculation refers to the entire line rather than station or journey specific. The monthly chart shows **reported coverage** and does not represent a full reliability ranking.
 
-### How to run it
-The commands below assume **Python3** and a terminal opened in the project folder. This is for macOS.
+## How to run it
 
-**1. clone the repository.** Replace the placeholder with this projects GitHub URL:
+The commands below assume **Python3** and a terminal opened in the project folder. This is written for macOS.
+
+**1. clone the repository.**
 
 ```bash
 git clone https://github.com/RithinBhudia/RouteRadar.git
@@ -184,10 +187,10 @@ python3 -m streamlit run app.py
 
 Streamlit will show a local URL looking something likeL `http://localhost:8501`. Select an Underground line to explore its layest API status and its historical 2025 morning commute metrics.
 
-## What I will do next:
-1. **Resolve ambiguous statuses**
-2. **Personalise the analysis**
-3. **Improve geographical analysis**
-
+### What I will do next:
+1. **Resolve ambiguous statuses:** Review the historical message descriptions and schedules to differentiate between planned engineering restrictions from normal non operating periods.
+2. **Personalise the analysis:** Add evening commutes, user selectable hours for taylored information, add more years and comparison visuals between lines.
+3. **Improve geographical analysis:** Incorporate affected stations or line segments where TfL provides information.
+4. **Automate collection:** Schedule TfL API extractions and build a longer series of saved API snapshots.
 
 Powered by TFL Open Data. RouteRadar is an independent educational/portfolio project, not an official TfL application.
