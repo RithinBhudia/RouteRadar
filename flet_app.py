@@ -36,8 +36,8 @@ def run_query(sql:str, params:list | None = None) -> list[dict]:
 
 # list of lines
 def all_lines() -> list[str]:
-    
-    # copied form app.py
+
+    # copied from app.py
     lines = run_query("""
 SELECT DISTINCT line_name
 FROM disruption_intervals
@@ -49,7 +49,7 @@ ORDER BY line_name
 
 def latest_status(selected_line: str) -> tuple[object | None, list[dict]]:
     
-    # copied form app.py
+    # copied from app.py
     latest = run_query("""
         SELECT MAX(extracted) AS latest_time
         FROM api_line_status
@@ -73,4 +73,54 @@ def latest_status(selected_line: str) -> tuple[object | None, list[dict]]:
         """, [selected_line])
     return latest_time, status
 
-def
+def weeday_commute_window(selected_line: str) -> list[dict]:
+
+    # copied from app.py:
+    # generate weekday commute windows and intersect each window
+    # with the non overlapping intervals we constructed
+    commute_data = run_query("""
+    WITH days AS (
+    SELECT CAST(day_value AS DATE) AS commute_date
+
+    FROM generate_series(DATE '2025-01-01', DATE '2025-12-31', 
+    INTERVAL '1 day') AS t(day_value)
+
+    WHERE EXTRACT(ISODOW FROM day_value)
+    BETWEEN 1 AND 5
+    ),
+
+    windows AS(
+    SELECT commute_date,
+    CAST(commute_date AS TIMESTAMP) + INTERVAL '7 hours' AS window_start,
+    CAST(commute_date AS TIMESTAMP) + INTERVAL '9 hours' AS window_end
+
+    FROM days
+    )
+
+
+    SELECT w.commute_date,
+    COALESCE(SUM(
+    CASE
+    WHEN d.start_time IS NOT NULL THEN
+    DATE_DIFF('second', GREATEST(d.start_time, w.window_start),
+    LEAST(d.end_time,w.window_end)
+    ) 
+    ELSE 0
+    END
+    ),0) AS disruption_seconds
+
+    FROM windows w
+
+    LEFT JOIN disruption_intervals d
+    ON d.line_name = ?
+    AND d.start_time < w.window_end
+    AND d.end_time > w.window_start
+
+    GROUP BY w.commute_date
+    ORDER BY w.commute_date
+
+    """,[selected_line])
+    return commute_data
+    # The code above is to count the duration of disruption periods between 7am and 9am.
+
+    
