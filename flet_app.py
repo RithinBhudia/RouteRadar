@@ -1,4 +1,6 @@
-# This is written only for the app.
+# This is written only for the app. 
+## A lot of this is currently being transfered over from the streamlit app.py.
+
 #  It should not be treated as part of the repository yet.
 
 import os
@@ -23,7 +25,7 @@ grey = "#606971"
 
 def run_query(sql:str, params:list | None = None) -> list[dict]:
     conn = duckdb.connect(str(DATABASE), read_only = True)
-    
+
     try:
         result = conn.execute(sql, params or [])
         columns = [description[0] for description in result.description]
@@ -31,3 +33,44 @@ def run_query(sql:str, params:list | None = None) -> list[dict]:
     
     finally:
         conn.close()
+
+# list of lines
+def all_lines() -> list[str]:
+    
+    # copied form app.py
+    lines = run_query("""
+SELECT DISTINCT line_name
+FROM disruption_intervals
+WHERE line_name IS NOT NULL
+ORDER BY line_name
+""")
+    return [str(line["line_name"]) for line in lines]
+
+
+def latest_status(selected_line: str) -> tuple[object | None, list[dict]]:
+    
+    # copied form app.py
+    latest = run_query("""
+        SELECT MAX(extracted) AS latest_time
+        FROM api_line_status
+        """)
+
+    latest_time = latest[0]["latest_time"] if latest else None
+    if latest_time is None:
+        return None, []
+
+    # copied form app.py
+    status = run_query("""
+        SELECT line_name,
+        status_description,
+        reason,
+        extracted
+    
+        FROM api_line_status
+        WHERE line_name = ?
+        AND extracted = (SELECT MAX(extracted)
+        FROM api_line_status)
+        """, [selected_line])
+    return latest_time, status
+
+def
