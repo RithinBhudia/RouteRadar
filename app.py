@@ -30,7 +30,7 @@ def check_database():
 
     scripts = ["load_historical.py",
                "clean_historical.py",
-               "build_historical.py",
+               "build_intervals.py",
                "load_api_status.py"]
 
     for script in scripts:
