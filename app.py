@@ -34,7 +34,7 @@ def check_database():
                "load_api_status.py"]
 
     for script in scripts:
-        subprocess.run([sys.executable, str(ROOT/"src / script")],
+        subprocess.run([sys.executable, str(ROOT/"src" / script)],
                        cwd = ROOT,
                        check = True)
 with st.spinner("running prerequisits for RouteRadar data..."):
