@@ -7,6 +7,9 @@ import duckdb
 import streamlit as st
 import pandas as pd
 
+import subprocess
+import sys
+
 
 # inital app configuration
 st.set_page_config(
@@ -19,12 +22,30 @@ st.set_page_config(
 ROOT = Path(__file__).resolve().parent
 DATABASE = ROOT /"data/processed/routeradar.duckdb"
 
+# cashe the result of the function below this:
+@st.cache_resource(show_spinner=False)
+def check_database():
+    if DATABASE.exists():
+        return
+
+    scripts = ["load_historical.py",
+               "clean_historical.py",
+               "build_historical.py",
+               "load_api_status.py"]
+
+    for script in scripts:
+        subprocess.run([sys.executable, str(ROOT/"src / script")],
+                       cwd = ROOT,
+                       check = True)
+with st.spinner("running prerequisits for RouteRadar data..."):
+    try:
+        check_database()
+
+    except subprocess.CalledProcessError:
+        st.error("Database could not be built")
+        st.stop()
 
 
-# connect to duckdb
-if not DATABASE.exists():
-    st.error("database not found.")
-    st.stop()
 
 # create a function to run sql query
 def run_query(sql, params = None):

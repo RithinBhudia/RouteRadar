@@ -73,7 +73,7 @@ def latest_status(selected_line: str) -> tuple[object | None, list[dict]]:
         """, [selected_line])
     return latest_time, status
 
-def weeday_commute_window(selected_line: str) -> list[dict]:
+def weekday_commute_window(selected_line: str) -> list[dict]:
 
     # copied from app.py:
     # generate weekday commute windows and intersect each window
@@ -123,4 +123,3 @@ def weeday_commute_window(selected_line: str) -> list[dict]:
     return commute_data
     # The code above is to count the duration of disruption periods between 7am and 9am.
 
-    
