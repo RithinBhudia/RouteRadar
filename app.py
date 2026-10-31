@@ -10,6 +10,13 @@ import pandas as pd
 import subprocess
 import sys
 
+# for automation
+import os
+import requests
+from dotenv import load_dotenv
+from datetime import datetime, timezone
+
+
 
 # inital app configuration
 st.set_page_config(
@@ -21,6 +28,68 @@ st.set_page_config(
 # directories
 ROOT = Path(__file__).resolve().parent
 DATABASE = ROOT /"data/processed/routeradar.duckdb"
+
+# automatically collect TfL api snapshots
+@st.cache_data(ttl = 300)
+def get_tfl_api():
+    url = "https://api.tfl.gov.uk/Line/Mode/tube/Status"
+
+    params = {"detail": "true"}
+
+    api_key = os.getenv("KEY")
+
+    if api_key:
+        # add api_key to dictionary
+        params["app_key"] = api_key
+
+    response = requests.get(url,
+                            params = params,
+                            timeout = 15)
+    
+    response.raise_for_status()
+
+    return response.json(), datetime.now(timezone.utc)
+
+
+@st.fragment(run_every = "5m")
+def update_tfl_api(selected_line):
+
+    st.subheader("Current tFl Service Status")
+
+    try:
+        data, checked_at = get_tfl_api()
+
+    except requests.request:
+        st.warning("Unable to retrieve TfL status at the moment")
+        return
+
+    matching_lines = [line for line in data
+                      if line.get("name") == selected_line]
+
+    if not matching_lines:
+        st.info("No matching line found in TfL api")
+
+    for line in matching_lines:
+        for status in line.get("lineStatuses") or []:
+
+            description = status.get("statusSeverityDescription",
+                                     "Unknown Status")
+
+            if description == "Good Service":
+                st.success(description)
+            else:
+                st.warning(description)
+
+            reason = status.get("reason")
+
+            if reason:
+                st.write(reason)
+            
+    st.caption(f"checked TfL at {checked_at:%H:%M UTC, %d %B %Y}"
+               "Refreshes approximately every 5 minutes while page is open")
+
+
+
 
 # cashe the result of the function below this:
 @st.cache_resource(show_spinner=False)
@@ -109,60 +178,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
-with st.container(border = True, key = "lighter_colour2"):
-
-    st.subheader("Latest Service Status")
-
-    # latest extracted timd
-    latest = run_query("""
-    SELECT MAX(extracted) AS latest_time
-    FROM api_line_status
-    """)
-
-    latest_time =latest.iloc[0]["latest_time"]
-
-    if pd.isna(latest_time):
-        st.warning("No API snapshots available")
-    else:
-        status = run_query("""
-    SELECT line_name,
-    status_description,
-    reason,
-    extracted
-
-    FROM api_line_status
-    WHERE line_name = ?
-    AND extracted = (SELECT MAX(extracted)
-    FROM api_line_status)
-    """, [selected_line])
-
-        if status.empty:
-            st.info(
-                "No matching status in the latest snapshot"
-            )
-
-        else:
-            # for each row where the line matches what the user put in the drop down is
-            # from the latest snapshot, write the status_description along with its respective reason.
-            for _, row in status.iterrows():
-
-                # display the status for each row
-                if row["status_description"] == "Good Service":
-                    st.success("Good Service")
-                else:
-                    st.markdown(
-                        f"#### {row['status_description']}"
-                    )
-
-                # if reason is not NULL and not empty string ""
-                if pd.notna(row["reason"]) and row["reason"]:
-                    st.write(row["reason"])
-
-            st.caption(f"Latest snapshot collected at {pd.to_datetime(latest_time).strftime("%H:%M  %d %B %Y ")}")
-
-    st.caption("TfL's saved API snapshot"
-            " - May not reflect live service status.")
+# instead of reading api snapshots from duckdb, get current service status directly from tfl api.
+with st.container(border=True, key="lighter_colour2"):
+    update_tfl_api(selected_line)
 
 
 
