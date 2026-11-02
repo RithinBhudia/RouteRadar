@@ -7,8 +7,11 @@ import duckdb
 import streamlit as st
 import pandas as pd
 
+import base64
+
 import subprocess
 import sys
+
 
 # for automation
 import os
@@ -28,6 +31,42 @@ st.set_page_config(
 # directories
 ROOT = Path(__file__).resolve().parent
 DATABASE = ROOT /"data/processed/routeradar.duckdb"
+
+
+#### tfl background
+image_path = ROOT / "design" / "line_header.png"
+encoded_image = base64.b64encode(
+    image_path.read_bytes()
+).decode()
+
+st.html(f"""
+<style>
+.stApp {{
+    position: relative;
+}}
+
+.stApp::before {{
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background-image: url("data:image/png;base64,{encoded_image}");
+    background-repeat: no-repeat;
+    background-position: right 0px top 80px;
+    background-size: 1100px auto;
+
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+}}
+
+.stApp > * {{
+    position: relative;
+    z-index: 1;
+}}
+</style>
+""")
+####
 
 # automatically collect TfL api snapshots
 @st.cache_data(ttl = 300)
@@ -126,11 +165,20 @@ def run_query(sql, params = None):
         conn.close()
 
 
+#header_left, header_right = st.columns([4,1],
+#                                       vertical_alignment = "center",
+#                                       gap = "small")
+
 # page heading
+#with header_left:
 st.title(":red[Route]:blue[Radar] :grey[| Tube Insights]")
 st.write(
-    "Explore service statuses and historical disruption patterns across London's Underground."
-)
+        "Explore service statuses and historical disruption patterns across London's Underground."
+    )
+
+
+#st.image(ROOT / "design/line_header.png",
+#         width = "stretch")
 
 st.divider()
 
