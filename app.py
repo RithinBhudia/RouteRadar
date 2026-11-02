@@ -124,8 +124,8 @@ def update_tfl_api(selected_line):
             if reason:
                 st.write(reason)
             
-    st.caption(f"checked TfL at {checked_at:%H:%M UTC, %d %B %Y}"
-               "Refreshes approximately every 5 minutes while page is open")
+    st.caption(f"Checked TfL at {checked_at:%H:%M UTC, %d %B %Y}."
+               " Refreshes approximately every 5 minutes while page is open")
 
 
 
