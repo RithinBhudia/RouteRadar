@@ -2,9 +2,11 @@
 
 **London Underground service status insights for everyday commmuters.**
 
-RouteRadar is a Streamlit dashboard supported by a Pyhon, SQL, DuckDB data pipeline. It combines the latest Transport for London (TfL) *API status snapshots* with *historical service status records* to help people explore when their Underground line has been reported to have service restrictions.
+RouteRadar is an interactive Streamlit dashboard supported by a Python, SQL and DuckDB data pipeline. It combines the current Transport for London (TfL) **API status information**, retrieved directly from the TfL A Unified API and refreshed every five minutes while the dashboard is open. The historical service status records help users explore reported restrictions across London's Underground network.
 
-> **Project status:** First draft. Historical figures currently cover the selected TfL status categories and weekday morning commute windows in 2025. **They should not be interpreted as measured passenger delays.**
+*(Previously, the dashboard displayed the most recently saved TfL API snapshot from the DuckDB database, rather than retrieving updated statuses directly from the API.)*
+
+> **Project status:** Working prototype. The dashboard retrieves TfL service statuses with automatic refreshes every five minutes with the web page is open. The historical analysis currently covers selected TfL service restriction categories during weekday morning commute windows (07:00 - 09:00) in 2025. **These figures should not be interpreted as measured passenger delays.**
 
 ## What I built and who is it for
 
@@ -12,22 +14,12 @@ I built RouteRadar for London Underground commuters who want more context about 
 
 Users can select an Underground line to:
 
-- View the **latest collected TfL service status**, including when the snapshot was taken.
+- View the **current collected TfL service status**, retrieved directly from the TfL API and refreshed every five minutes with the dashboard is open.
 - See **how many mornings has a reported service restrictriction between 7am and 9am** in 2025.
-- See **how many hours those restrictions covered**.
-- Compare **monthly patters** in recorded restriction coverage.*
+- See **how many hours those restrictions covered** during the morning commute window.
+- Compare **monthly patters** in reported restriction coverage.*
 
-The question I wanted my app to answer are: *How frequently was my line reporting a restriction during my morning commuting hours?* *How long did these reports cover?* *Did certain months have more reported restriction time than others?* *What did TfL report in their latest API?*
-
-**About me and why I applied:** I've become interested in data engineering because I like the process of taking messy data, figuring out what's going on with it and turning it into something useful. What interests me about The Information Lab is the chance to learn from people with more experience, improve my technical skills and work on real projects. Building RouteRadar has taught me a lot, especially that working with data isn't just about writing code that works, but also understanding the data and questioning the decisions you're making along the way. I know I've still got a lot to learn, but that's one of the reasons I'm excited about this opportunity.
-
-**Where AI helped:** I used AI as a learning resource throughout the project, mainly to help me understand certain technical concepts, explore different approaches and troubleshoot issues when I got stuck.
-
-It also helped me with parts of the README, including the repository structure diagram, and with organising the dependencies in my requirements.txt file. I used it for some of the Streamlit styling and layout, particularly the HTML and CSS elements.
-
-I reviewed and adapted the suggestions to fit my project rather than just accepting them as they were. It was especially useful for discussing different approaches and questioning the reasoning behind certain decisions, such as how to classify the historical service statuses.
-
-I'm also currently using it to explore Flock and Flet as I'd eventually like to turn RouteRadar into a mobile app. I'm still deciding which approach would work best and AI has been useful for understanding the options and what would be involved.
+The question I wanted my app to answer are: *How frequently was my line reporting a restriction during my morning commuting hours?* *How long did these reports last within those hours?* *Did certain months have more reported restriction time than others?* *What did TfL report in their latest API?*
 
 ## The data
 
@@ -62,6 +54,18 @@ RouteRadar/
 ├── requirements.txt
 ├── .gitignore
 ├── app.py
+│
+├── flet_app.py   (Not officially part of repo)
+│
+├── .streamlit/
+│   └── config.toml
+│
+├── .devcontainer/
+│   └── devcontainer.json
+│
+├── design/
+│   └── line_header.png
+│
 │
 ├── data/
 │   ├── raw/
@@ -98,11 +102,16 @@ Historical TfL CSV
     -> raw_service_status
     -> stg_service_status / clean_service_status
     -> classified_service_status
-    -> disruption_intervals ----------------------\
-                                                   \
-TfL Unified API                                     |-> Streamlit app dashboard
-    -> original timestamped JSON snapshots         /
-    -> api_line_status ---------------------------/
+    -> disruption_intervals ------------------------\
+                                                     \
+TfL Unified API                                       |-> Streamlit app dashboard
+    -> Direct API request.                           /
+    -> Cached response (300 seconds)                /
+    -> Automatic refresh while page is open -------/
+
+Previously saved TfL JSON snapshots
+    -> load_api_status.py
+    -> api_line_status (DuckDB)
 ```
 
 ### 1. Preserve raw inputs
