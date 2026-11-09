@@ -140,7 +140,8 @@ Previously saved TfL JSON snapshots
 - It displays the number of affected mornings, total restriction hours and a monthly chart.
 - The dashboard queries `api_line_status` for the most recent saved status of the selected line.
 
---
+
+
 
 ### What the metrics mean
 - **mornings with reported restrictions:** the number of weekday morning windows containing at least some time covered by an included TfL status record.

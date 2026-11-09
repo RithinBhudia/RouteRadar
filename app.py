@@ -93,7 +93,7 @@ def get_tfl_api():
 @st.fragment(run_every = "5m")
 def update_tfl_api(selected_line):
 
-    st.subheader("Current tFl Service Status")
+    st.subheader("Current TfL Service Status")
 
     try:
         data, checked_at = get_tfl_api()
